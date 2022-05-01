@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h1>Добро пожаловать на главную страницу</h1>
+{% if request.user.is_authenticated %}
+  <h3>Добро пожаловать,{{user.username}}</h3>
+    <a href = "{% url 'logout' %}">Выйти</a>
+{% else %}
+  <h3>Видимо вы не зарегистрированы, нажмите на ссылочку внизу, дабы можно было авторизоваться или создать нового пользоватея</h3>
+    <a href = "{% url 'register' %}">Зарегистрироваться</a>
+    <a href = "{% url 'login' %}">Войти</a>
+{% endif %}
+</body>
+</html>
