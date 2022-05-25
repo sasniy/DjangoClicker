@@ -1,38 +1,91 @@
-from django.contrib.auth import login, logout, authenticate
+from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.forms import model_to_dict
-from django.http import HttpResponse
-from django.shortcuts import redirect, render
-from rest_framework import request
+from django.shortcuts import render, redirect
+from rest_framework import viewsets
+from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
+from frontend.templates import *
 from .forms import UserForm
+from .models import Core, Boost  # Не забудем импортировать модель Core
+from .serializers import CoreSerializer, BoostSerializer
 
 
-class UserApi(APIView):
+class Register(APIView):
     def get(self, request):
-        id = request.query_params.get("id")  # Получение id из параметров запроса
-        if User.objects.filter(id=id).exists():
-            print(request.user)
-            user = User.objects.get(pk=id)
-            return Response({
-                "id": user.id,
-                "username": user.username,
-            })
-            # Получаем пользователя
-        # Если в запросе нет параметра id, возвращаем все заметки
-        return Response({
-            "error": "Пользователя с таким id не найдено"
-        })
+        form = UserForm()
+        return render(request, 'register.html', {'form': form})
 
     def post(self, request):
-        username = request.data.get('username')
-        password = request.data.get('password')
-        new_user = User.objects.create_user(username=username, password=password)
-        return Response({'user': model_to_dict(new_user)})
+        form = UserForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+
+            core = Core(user=user)  # Создаем экземпляр класса Core и пихаем в него модель юзера
+            core.save()  # Сохраняем изменения в базу
+            return redirect('index')
+
+        return render(request, 'register.html', {'form': form})
 
 
+class Login(APIView):
+    form = UserForm()
+
+    def get(self, request):
+        return render(request, 'login.html', {'form': self.form})
+
+    def post(self, request):
+        user = authenticate(username=request.POST.get('username'), password=request.POST.get('password'))
+        if user:
+            login(request, user)
+            return redirect('index')
+        return render(request, 'login.html', {'form': self.form, 'invalid': True})
+
+
+@login_required
 def index(request):
-    return render(request, 'index.html')
+    core = Core.objects.get(user=request.user)
+    boosts = Boost.objects.filter(core=core)  # Достаем бусты пользователя из базы
+
+    return render(request, 'index.html', {
+        'core': core,
+        'boosts': boosts,  # Возвращаем бусты на фронтик
+    })
+
+
+@api_view(['GET'])
+@login_required
+def call_click(request):
+    core = Core.objects.get(user=request.user)
+    is_levelup = core.click() # Труе если буст создался
+    if is_levelup:
+        Boost.objects.create(core=core, price=core.level*50, power=core.level*20) # Создание буста
+    core.save()
+
+    return Response(data = { 'core': CoreSerializer(core).data, 'is_levelup': is_levelup})
+
+class BoostViewSet(viewsets.ModelViewSet):
+    queryset = Boost.objects.all()
+    serializer_class = BoostSerializer
+
+    # Переопределение метода get_queryset для получения бустов, привязанных к определенному ядру
+    def get_queryset(self):
+        core = Core.objects.get(user=self.request.user) # Получение ядра пользователя
+        boosts = Boost.objects.filter(core=core) # Получение бустов ядра
+        return boosts
+
+@api_view(['GET'])
+@login_required
+def call_boost(request,pk):
+    print(request)
+    core = Core.objects.get(user = request.user)
+    boost = Boost.objects.get(core = core,id = pk)
+    if boost.buy():
+        core.coins -= boost.price
+        core.click_power += boost.power
+
+    core.save()
+    return Response({'core': CoreSerializer(core).data,})
