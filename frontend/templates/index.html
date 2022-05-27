@@ -13,23 +13,31 @@
         </nav>
 
         <div class="container">
-            <div id='coins'>{{core.coins}}</div>
-            <button onclick="call_click()">Нажми меня</button>
+            <div class = 'coins'>
+                <img src = 'media/img/dollar.png'></img>
+                 <div id='coins' class = 'coin'>{{core.coins}}</div>
+            </div>
+
+            <img src="media/img/first-ass.png" onclick="call_click()">Нажми меня</img>
             <p>
-                Невероятная мощь клика: <span id="click_power">{{ core.click_power }}</span>
+                Невероятная мощь ♂spanking♂: <span id="click_power">{{ core.click_power }}</span>
+            </p>
+            <p>
+                До следующего буста:<span id = "next_boost">{{next_boost}}</span>
             </p>
         </div>
 
         <aside class="boosts" id="boosts">
             <h3>Бусты</h3>
             <div class="boosts-holder" id="boosts-holder">
-                {% for boost in boosts %}
-                    <button class="boost" id="boost_{{boost.id}}" onclick="buy_boost({{boost.id}})">
-                        <p>lvl: <span id="boost_level">{{boost.level}}</span></p>
-                        <p>+<span id="boost_power">{{boost.power}} power </span></p>
-                        <p><span id="boost_price">{{boost.price}} price</span></p>
-                    </button>
-                {% endfor %}
+                 <script>get_boosts()</script>
+<!--                {% for boost in boosts %}-->
+<!--                    <button class="boost" id="boost_{{boost.id}}" onclick="buy_boost({{boost.id}})">-->
+<!--                        <p>lvl: <span id="boost_level">{{boost.level}}</span></p>-->
+<!--                        <p>+<span id="boost_power">{{boost.power}} power </span></p>-->
+<!--                        <p><span id="boost_price">{{boost.price}} price</span></p>-->
+<!--                    </button>-->
+<!--                {% endfor %}-->
             </div>
         </aside>
     </main>

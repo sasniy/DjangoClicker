@@ -49,8 +49,9 @@ class Login(APIView):
 def index(request):
     core = Core.objects.get(user=request.user)
     boosts = Boost.objects.filter(core=core)  # Достаем бусты пользователя из базы
-
+    price = core.check_level_price()
     return render(request, 'index.html', {
+        'next_boost' : price,
         'core': core,
         'boosts': boosts,  # Возвращаем бусты на фронтик
     })
@@ -60,12 +61,13 @@ def index(request):
 @login_required
 def call_click(request):
     core = Core.objects.get(user=request.user)
+    price = core.check_level_price()
     is_levelup = core.click() # Труе если буст создался
     if is_levelup:
-        Boost.objects.create(core=core, price=core.level*50, power=core.level*20) # Создание буста
+        Boost.objects.create(core=core, price=price*1.15, power=(core.level-1)**2) # Создание буста
     core.save()
-
-    return Response(data = { 'core': CoreSerializer(core).data, 'is_levelup': is_levelup})
+    next_boost = core.check_level_price()
+    return Response(data = { 'core': CoreSerializer(core).data, 'is_levelup': is_levelup,'next_boost':next_boost})
 
 class BoostViewSet(viewsets.ModelViewSet):
     queryset = Boost.objects.all()
@@ -79,13 +81,13 @@ class BoostViewSet(viewsets.ModelViewSet):
 
 @api_view(['GET'])
 @login_required
-def call_boost(request,pk):
+def buy_boost(request,pk):
     print(request)
     core = Core.objects.get(user = request.user)
     boost = Boost.objects.get(core = core,id = pk)
     if boost.buy():
         core.coins -= boost.price
         core.click_power += boost.power
-
+    price = core.check_level_price()
     core.save()
-    return Response({'core': CoreSerializer(core).data,})
+    return Response({'core': CoreSerializer(core).data,'price': price})

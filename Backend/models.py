@@ -18,18 +18,15 @@ class Core(models.Model):
         return False  # Фалсе если буст не создался
 
     def check_level_price(self):  # Функция вычисления количества монет для повышения уровня
-        return (self.level ** 2 + 1) * 100 * (self.level + 1)  # Формулу можно поменять в зависимости от баланса игры
+        return int(((self.level ** 2) * 100 * (self.level+1))) # Формулу можно поменять в зависимости от баланса игры
 # Create your models here.
 class Boost(models.Model):
     core = models.ForeignKey(Core, null=False, on_delete=models.CASCADE)
-    level = models.IntegerField(default=1)
     price = models.IntegerField(default=10)
     power = models.IntegerField(default=1)
 
     def buy(self):
         if self.core.coins >= self.price:
-            self.level += 1
-
             print('buy')
             return True
         return False
