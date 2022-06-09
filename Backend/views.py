@@ -85,9 +85,11 @@ def buy_boost(request,pk):
     print(request)
     core = Core.objects.get(user = request.user)
     boost = Boost.objects.get(core = core,id = pk)
+    buyed = False
     if boost.buy():
+        buyed = True
         core.coins -= boost.price
         core.click_power += boost.power
     price = core.check_level_price()
     core.save()
-    return Response({'core': CoreSerializer(core).data,'price': price})
+    return Response({'core': CoreSerializer(core).data,'price': price,'buyed':buyed})

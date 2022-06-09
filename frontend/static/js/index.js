@@ -1,7 +1,7 @@
 
 
 function call_click() {
-    var audio = new Audio('media/sounds/Spank.mp3')
+    var audio = new Audio('media/sounds/hlop.mp3')
     audio.play()
 
     fetch('/call_click/', {
@@ -29,12 +29,16 @@ function buy_boost(boost_id) {
         method: 'GET'
     }).then(response => {
         if (response.ok) {
-            var audio = new Audio('media/sounds/buy_boost.mp3')
-            audio.play()
+
             return response.json()
         }
         return Promise.reject(response)
     }).then(data => {
+        if (data.buyed)
+        {
+            var audio = new Audio('media/sounds/buy_boost.mp3')
+            audio.play()
+        }
         document.getElementById('coins').innerText = data.core.coins
         document.getElementById('click_power').innerText = data.core.click_power
         document.getElementById('next_boost').innerText = data.price

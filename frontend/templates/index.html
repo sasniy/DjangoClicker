@@ -17,18 +17,22 @@
                 <img src = 'media/img/dollar.png'></img>
                  <div id='coins' class = 'coin'>{{core.coins}}</div>
             </div>
+            <div class = "clicker">
+                <img src="media/img/first-ass.png" onclick="call_click()"></img>
+            </div>
 
-            <img src="media/img/first-ass.png" onclick="call_click()">Нажми меня</img>
-            <p>
-                Невероятная мощь ♂spanking♂: <span id="click_power">{{ core.click_power }}</span>
-            </p>
-            <p>
-                До следующего буста:<span id = "next_boost">{{next_boost}}</span>
-            </p>
+            <div class = "stats">
+                <p>
+                    Невероятная мощь ♂spanking♂: <span id="click_power">{{ core.click_power }}</span>
+                </p>
+                <p>
+                    До следующего буста:<span id = "next_boost">{{next_boost}}</span>
+                </p>
+            </div>
         </div>
 
         <aside class="boosts" id="boosts">
-            <h3>Бусты</h3>
+            <h3 class = 'boost-text'>Бусты</h3>
             <div class="boosts-holder" id="boosts-holder">
                  <script>get_boosts()</script>
 <!--                {% for boost in boosts %}-->
